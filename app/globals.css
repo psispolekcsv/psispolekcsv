@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #f4f4f3;
+  --color-mist: #e5e5e3;
+  --color-ink: #292929;
+  --color-ink-deep: #181818;
+  --color-line: #d4d4d2;
+  --color-amber: #c8752b;
+  --color-amber-deep: #8a4e14;
+  --color-danger: #8d2b2b;
+  --font-sans: var(--font-source), "Source Sans 3", sans-serif;
+  --font-serif: var(--font-newsreader), Newsreader, serif;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.9rem;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: #ead3b8;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-amber-deep);
+  outline-offset: 2px;
+}
+
+.prose-club {
+  max-width: 68ch;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.prose-club p,
+.prose-club ul,
+.prose-club ol {
+  margin-top: 0.9rem;
+}
+
+.prose-club h2,
+.prose-club h3 {
+  font-family: var(--font-serif);
+  color: var(--color-ink-deep);
+  line-height: 1.25;
+  margin-top: 1.8rem;
+}
+
+.prose-club h2 {
+  font-size: 1.7rem;
+}
+
+.prose-club ul {
+  padding-left: 1.2rem;
+  list-style: disc;
+}
+
+.prose-club a {
+  color: var(--color-amber-deep);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.prose-club strong {
+  font-weight: 650;
+}

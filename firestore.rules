@@ -1,0 +1,114 @@
+rules_version = '2';
+// Klub československého vlčáka
+// Vložte do Firebase Console → Firestore Database → Rules a publikujte.
+// Zápisy obsahu, rolí, podání, tokenů a auditu jdou jen přes server (Admin SDK).
+// Admin SDK pravidla obchází, proto každý serverový endpoint znovu ověřuje roli.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    match /news/{id} {
+      allow read: if resource.data.published == true;
+      allow write: if false;
+    }
+
+    match /pages/{id} {
+      allow read: if resource.data.published == true;
+      allow write: if false;
+    }
+
+    match /events/{id} {
+      allow read: if resource.data.published == true;
+      allow write: if false;
+    }
+
+    match /documents/{id} {
+      allow read: if resource.data.published == true;
+      allow write: if false;
+    }
+
+    match /dogs/{id} {
+      allow read: if resource.data.published == true;
+      allow write: if false;
+    }
+
+    match /kennels/{id} {
+      allow read: if resource.data.published == true;
+      allow write: if false;
+    }
+
+    match /litters/{id} {
+      allow read: if resource.data.published == true;
+      allow write: if false;
+    }
+
+    match /healthResults/{id} {
+      allow read: if resource.data.published == true;
+      allow write: if false;
+    }
+
+    match /partners/{id} {
+      allow read: if resource.data.published == true;
+      allow write: if false;
+    }
+
+    match /gallery/{id} {
+      allow read: if resource.data.published == true;
+      allow write: if false;
+    }
+
+    match /classifieds/{id} {
+      allow read: if resource.data.published == true;
+      allow write: if false;
+    }
+
+    match /siteSettings/{id} {
+      allow read: if id == "general" || id == "homepage";
+      allow write: if false;
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create, update, delete: if false;
+    }
+
+    match /formTemplates/{id} {
+      allow read, write: if false;
+    }
+
+    match /formSubmissions/{id} {
+      allow read, write: if false;
+    }
+
+    match /approvalTokens/{id} {
+      allow read, write: if false;
+    }
+
+    match /dogsPrivate/{id} {
+      allow read, write: if false;
+    }
+
+    match /auditLogs/{id} {
+      allow read, write: if false;
+    }
+
+    match /emailLogs/{id} {
+      allow read, write: if false;
+    }
+
+    match /rateLimits/{id} {
+      allow read, write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

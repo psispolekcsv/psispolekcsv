@@ -1,0 +1,13 @@
+rules_version = '2';
+// Klub československého vlčáka
+// Firebase Console → Storage → Rules.
+// Zápis jen přes Admin SDK. Veřejné čtení jde přes aplikaci (/api/media),
+// přímý přístup z prohlížeče k souborům je vypnutý.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
