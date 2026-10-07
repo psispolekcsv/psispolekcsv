@@ -42,7 +42,7 @@ export function Footer({ settings }: { settings: SiteSettings }) {
           <p>© {new Date().getFullYear()} {settings.clubName}</p>
           <p>
             Vyrobil{" "}
-            <a href="https://vrbajiri.digital" target="_blank" rel="noopener noreferrer" className="text-white underline decoration-amber underline-offset-2">
+            <a href="https://jirivrba.digital" target="_blank" rel="noopener noreferrer" className="text-white underline decoration-amber underline-offset-2">
               stržm. Vrba Jiří
             </a>
           </p>

@@ -19,8 +19,14 @@ export function WolfMascot({
 }) {
   const image = sources[variant];
   return (
-    <div className={`relative ${className}`}>
-      <Image src={image.src} alt={image.alt} fill priority={priority} sizes="(min-width: 768px) 420px, 80vw" className="object-contain" />
+    <div className={`@container relative flex items-center justify-center ${className}`}>
+      <div className="relative aspect-square w-[min(100cqw,100cqh)]">
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-[2.4%] left-1/2 z-0 h-3 w-[46%] -translate-x-1/2 rounded-[100%] bg-ink-deep/50 blur-[2px]"
+        />
+        <Image src={image.src} alt={image.alt} fill priority={priority} sizes="(min-width: 768px) 420px, 80vw" className="z-10 object-contain" />
+      </div>
     </div>
   );
 }

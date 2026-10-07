@@ -14,7 +14,7 @@ import { writeAudit, writeEmailLog } from "@/lib/server/audit";
 import { getTemplateBySlug, removeDoc, saveDoc, saveSettings } from "@/lib/server/data";
 import { requireAdmin, requireSuperadmin } from "@/lib/server/session";
 import { saveBuffer, storageId } from "@/lib/server/storage";
-import { createRevision } from "@/lib/server/submissions";
+import { createRevision, reviewSubmission } from "@/lib/server/submissions";
 import { asBool, asString, siteUrl, slugify } from "@/lib/utils";
 import type { Role, UserProfile } from "@/types/domain";
 
@@ -337,6 +337,25 @@ export async function seedTemplatesAction() {
   await writeAudit({ actorUid: user.uid, actorEmail: user.email, action: "content_saved", entity: "formTemplates", entityId: "seed", message: "Výchozí formuláře" });
   revalidatePath("/formulare");
   redirect("/sprava/formulare?ulozeno=1");
+}
+
+export async function reviewSubmissionAction(formData: FormData) {
+  const user = await requireAdmin();
+  const id = asString(formData.get("id"));
+  const decision = asString(formData.get("decision"));
+  if (!id) throw new Error("Podání neexistuje.");
+  if (decision === "delete") {
+    await removeDoc("formSubmissions", id);
+    await writeAudit({ actorUid: user.uid, actorEmail: user.email, action: "content_deleted", entity: "formSubmissions", entityId: id, message: "Smazání podání" });
+    revalidatePath("/sprava/podani");
+    redirect("/sprava/podani");
+  }
+  if (decision !== "approve" && decision !== "respond" && decision !== "ignore") {
+    throw new Error("Neznámá reakce.");
+  }
+  await reviewSubmission(user, id, decision, asString(formData.get("message")));
+  revalidatePath("/sprava/podani");
+  redirect(`/sprava/podani/${id}`);
 }
 
 export async function reviseSubmissionAction(formData: FormData) {

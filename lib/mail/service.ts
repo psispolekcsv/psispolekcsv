@@ -1,7 +1,35 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
+
 export interface OutboundMail {
   to: string;
   subject: string;
   html: string;
+  replyTo?: string;
+}
+
+let logoCache: string | null | undefined;
+
+function logoAttachment() {
+  if (logoCache === undefined) {
+    try {
+      logoCache = readFileSync(path.join(process.cwd(), "public/fotky/logo/logo-mail.png")).toString("base64");
+    } catch {
+      logoCache = null;
+    }
+  }
+  if (!logoCache) return undefined;
+  return [{ filename: "logo.png", content: logoCache, content_id: "logo" }];
+}
+
+function plainText(html: string) {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 export async function sendEmail(message: OutboundMail) {
@@ -17,12 +45,16 @@ export async function sendEmail(message: OutboundMail) {
     headers: {
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",
+      "User-Agent": "kcv-web/1.0",
     },
     body: JSON.stringify({
       from,
       to: [message.to],
       subject: message.subject,
       html: message.html,
+      text: plainText(message.html),
+      reply_to: message.replyTo || undefined,
+      attachments: logoAttachment(),
     }),
   });
 

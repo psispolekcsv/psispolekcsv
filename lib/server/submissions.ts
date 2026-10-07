@@ -6,16 +6,19 @@ import { reduceWorkflow, shouldSendFinalConfirmation, type WorkflowState } from 
 import { readVerifiedFile } from "@/lib/files/sniff";
 import { siteUrl } from "@/lib/utils";
 import {
+  mailAdminDecision,
+  mailAdminNewSubmission,
   mailAskApproval,
   mailFinal,
   mailPartial,
   mailReceived,
   mailRejected,
+  mailSubmissionReceived,
 } from "@/lib/mail/templates";
 import { sendEmail } from "@/lib/mail/service";
 import { adminDb } from "@/lib/firebase/admin";
 import { writeAudit, writeEmailLog } from "@/lib/server/audit";
-import { getSettings, getTemplateBySlug } from "@/lib/server/data";
+import { getSettings, getTemplateBySlug, listUsers } from "@/lib/server/data";
 import { mapSubmission } from "@/lib/server/map";
 import { saveBuffer, storageId } from "@/lib/server/storage";
 import type { FormSubmission, FormTemplate, PartyRecord, SubmissionFile } from "@/types/domain";
@@ -138,41 +141,29 @@ export async function submitPublicForm(input: {
     createdAt: now,
     updatedAt: now,
     approvedAt: null,
+    adminMessage: "",
   };
-  const next = reduceWorkflow(workflowOf(base), { type: "submit" });
-  const stored = applyState(base, next, now);
+  const stored: FormSubmission = { ...base, status: "submitted", locked: false };
   await ref.set(stripId(stored));
 
   const settings = await getSettings();
-  const urlBase = siteUrl();
-  if (next.status === "approved") {
-    await sendFinal(stored, settings.email);
-  } else {
-    const tokenA = await issueToken(ref.id, "a");
-    const linkA = `${urlBase}/schvaleni/${tokenA.raw}`;
-    const received = mailReceived({
-      formTitle: template.title,
-      submissionId: ref.id,
-      status: next.status,
-      actionUrl: linkA,
-      contactEmail: settings.email,
-    });
-    await deliver(partyA.email, received.subject, received.html, "received", ref.id);
-    if (partyB) {
-      const tokenB = await issueToken(ref.id, "b");
-      const ask = mailAskApproval({
-        formTitle: template.title,
-        submissionId: ref.id,
-        status: next.status,
-        actionUrl: `${urlBase}/schvaleni/${tokenB.raw}`,
-        contactEmail: settings.email,
-      });
-      await deliver(partyB.email, ask.subject, ask.html, "ask-approval", ref.id);
-    }
+  const received = mailSubmissionReceived({
+    formTitle: template.title,
+    submissionId: ref.id,
+    contactEmail: settings.email,
+  });
+  const applicants = [...new Set([partyA.email, partyB?.email].filter((item): item is string => Boolean(item)))];
+  for (const email of applicants) {
+    await deliver(email, received.subject, received.html, "received", ref.id);
   }
-
-  for (const email of noticeList(template, settings.email, partyA.email, partyB?.email)) {
-    await deliver(email, `Nové podání: ${template.title}`, `<p>Nové podání ${ref.id} je ve správě klubu.</p>`, "admin-notice", ref.id);
+  const notice = mailAdminNewSubmission({
+    formTitle: template.title,
+    submissionId: ref.id,
+    actionUrl: `${siteUrl()}/sprava/podani/${ref.id}`,
+    contactEmail: settings.email,
+  });
+  for (const email of await adminRecipients(template.notificationEmails, applicants)) {
+    await deliver(email, notice.subject, notice.html, "admin-notice", ref.id);
   }
 
   await writeAudit({
@@ -184,12 +175,21 @@ export async function submitPublicForm(input: {
     message: template.title,
   });
 
-  return { ok: true as const, id: ref.id, confirmation: template.confirmationText || "Podání jsme přijali." };
+  return {
+    ok: true as const,
+    id: ref.id,
+    confirmation: "Podání jsme přijali. Potvrzení odchází na váš e-mail a do správy klubu.",
+  };
 }
 
-function noticeList(template: FormTemplate, clubEmail: string, ...skip: (string | undefined)[]) {
-  const blocked = new Set(skip.filter(Boolean).map((item) => item!.toLowerCase()));
-  return [...template.notificationEmails, clubEmail].map((item) => item.trim().toLowerCase()).filter((item) => item && !blocked.has(item));
+async function adminRecipients(extra: string[], skip: string[]) {
+  const settings = await getSettings();
+  const users = await listUsers();
+  const blocked = new Set(skip.map((item) => item.toLowerCase()));
+  const fromAdmins = users
+    .filter((user) => user.approved && !user.disabled && (user.role === "admin" || user.role === "superadmin"))
+    .map((user) => user.email);
+  return [...new Set([settings.email, ...extra, ...fromAdmins].map((item) => item.trim().toLowerCase()).filter((item) => item && !blocked.has(item)))];
 }
 
 function assertWindow(template: FormTemplate) {
@@ -371,6 +371,59 @@ export async function readReceipt(rawToken: string) {
   return submission;
 }
 
+export async function reviewSubmission(
+  actor: { uid: string; email: string },
+  submissionId: string,
+  decision: "approve" | "respond" | "ignore",
+  message: string,
+) {
+  const db = adminDb();
+  if (!db) throw new Error("Firebase Admin není nakonfigurovaný.");
+  const snap = await db.collection("formSubmissions").doc(submissionId).get();
+  if (!snap.exists) throw new Error("Podání neexistuje.");
+  const submission = mapSubmission(snap.id, snap.data() || {});
+  if (submission.locked || submission.status !== "submitted") {
+    throw new Error("Na tohle podání už správa reagovala.");
+  }
+  const text = message.trim().slice(0, 2000);
+  if (decision !== "ignore" && text.length < 2) throw new Error("Napište zprávu, která přijde do e-mailu.");
+  const now = new Date().toISOString();
+  const status = decision === "approve" ? "approved" : decision === "respond" ? "responded" : "ignored";
+  await snap.ref.set(
+    {
+      status,
+      locked: true,
+      adminMessage: text,
+      updatedAt: now,
+      approvedAt: status === "approved" ? now : submission.approvedAt,
+    },
+    { merge: true },
+  );
+  if (decision !== "ignore") {
+    const settings = await getSettings();
+    const mail = mailAdminDecision({
+      formTitle: submission.formTitle,
+      submissionId: submission.id,
+      status: status === "approved" ? "approved" : "responded",
+      message: text,
+      contactEmail: settings.email,
+    });
+    const applicants = [submission.partyA.email, submission.partyB?.email].filter((item): item is string => Boolean(item));
+    const recipients = [...new Set([...applicants, ...(await adminRecipients([], applicants)), actor.email.trim().toLowerCase()])];
+    for (const email of recipients) {
+      await deliver(email, mail.subject, mail.html, decision, submission.id);
+    }
+  }
+  await writeAudit({
+    actorUid: actor.uid,
+    actorEmail: actor.email,
+    action: decision === "approve" ? "submission_approved" : decision === "respond" ? "submission_responded" : "submission_ignored",
+    entity: "formSubmissions",
+    entityId: submission.id,
+    message: text || submission.formTitle,
+  });
+}
+
 export async function createRevision(actor: { uid: string; email: string }, submissionId: string) {
   const db = adminDb();
   if (!db) throw new Error("Firebase Admin není nakonfigurovaný.");
@@ -393,6 +446,7 @@ export async function createRevision(actor: { uid: string; email: string }, subm
     partyB: submission.partyB ? { ...submission.partyB, approvedAt: null, rejectedAt: null, rejectReason: "" } : null,
     createdAt: now,
     updatedAt: now,
+    adminMessage: "",
   };
   await ref.set(stripId(copy));
   await writeAudit({

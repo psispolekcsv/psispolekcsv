@@ -250,6 +250,8 @@ export type SubmissionStatus =
   | "awaiting_party_b"
   | "awaiting_approvals"
   | "approved"
+  | "responded"
+  | "ignored"
   | "rejected"
   | "expired"
   | "cancelled";
@@ -293,6 +295,7 @@ export interface FormSubmission {
   createdAt: string;
   updatedAt: string;
   approvedAt: string | null;
+  adminMessage: string;
 }
 
 export interface ApprovalTokenRecord {

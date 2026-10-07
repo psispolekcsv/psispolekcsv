@@ -267,7 +267,7 @@ Na této stránce mohou být odkazy a stanoviska, která klub schválí, napří
     description: "Jak web nakládá s osobními údaji.",
     content: `Správcem údajů zadaných na tomto webu je Klub československého vlčáka. Přesné identifikační údaje doplní klub do kontaktů. Do té doby se za správce nepovažuje dodavatel webu.
 
-Formuláře slouží k vyřízení přihlášky, žádosti nebo inzerátu. Vyplněním a zaškrtnutím souhlasu dáváte údaje k tomuto účelu. U podání dvou stran vidí zadané údaje obě strany, protože každá z nich podání schvaluje, a vidí je správa klubu.
+Formuláře slouží k vyřízení přihlášky, žádosti nebo inzerátu. Vyplněním a zaškrtnutím souhlasu dáváte údaje k tomuto účelu. Potvrzení přijde na váš e-mail a do správy klubu. Správa podání vidí a může ho schválit, odpovědět, nechat bez reakce, nebo smazat.
 
 Veřejná databáze neobsahuje e-mail, telefon ani adresu majitele. Čip se zveřejní jen tehdy, když to správa u psa výslovně povolí. Soukromá část záznamu je v oddělené evidenci a z webu ji nelze číst.
 

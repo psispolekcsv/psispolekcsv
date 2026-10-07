@@ -1,5 +1,7 @@
 import type { FormTemplateInput } from "@/lib/forms/fields";
 
+const received = "Podání jsme přijali. Potvrzení odchází na váš e-mail a do správy klubu.";
+
 const consent = {
   id: "souhlas",
   type: "consent" as const,
@@ -15,11 +17,11 @@ export const seedFormTemplates: FormTemplateInput[] = [
   {
     title: "Přihláška do klubu",
     slug: "prihlaska-do-klubu",
-    description: "Žádost o členství. Po odeslání přijde žadateli e-mail s odkazem k potvrzení.",
+    description: "Žádost o členství. Po odeslání přijde potvrzení žadateli i správě klubu.",
     active: true,
     startsAt: "",
     endsAt: "",
-    confirmationText: "Děkujeme. Podání bude platné po potvrzení z e-mailu a po schválení správou klubu.",
+    confirmationText: received,
     approvalType: "single",
     notificationEmails: [],
     fields: [
@@ -38,7 +40,7 @@ export const seedFormTemplates: FormTemplateInput[] = [
     active: true,
     startsAt: "",
     endsAt: "",
-    confirmationText: "Přihláška čeká na potvrzení z vašeho e-mailu.",
+    confirmationText: received,
     approvalType: "single",
     notificationEmails: [],
     fields: [
@@ -54,11 +56,11 @@ export const seedFormTemplates: FormTemplateInput[] = [
   {
     title: "Žádost o krycí list",
     slug: "zadost-o-kryci-list",
-    description: "Žádost potvrzují obě strany: majitel feny a majitel psa. Každý dostane vlastní odkaz.",
+    description: "Žádost vyplní majitel feny. Správa klubu ji vidí ve své evidenci.",
     active: true,
     startsAt: "",
     endsAt: "",
-    confirmationText: "Žádost bude uzavřena až po potvrzení obou stran.",
+    confirmationText: received,
     approvalType: "dual",
     notificationEmails: [],
     fields: [
@@ -76,11 +78,11 @@ export const seedFormTemplates: FormTemplateInput[] = [
   {
     title: "Oznámení narození vrhu",
     slug: "oznameni-narozeni-vrhu",
-    description: "Hlášení vrhu potvrzuje chovatel a majitel otce vrhu.",
+    description: "Hlášení vrhu odesílá chovatel. Správa klubu ho vidí ve své evidenci.",
     active: true,
     startsAt: "",
     endsAt: "",
-    confirmationText: "Hlášení se uzamkne po potvrzení obou stran.",
+    confirmationText: received,
     approvalType: "dual",
     notificationEmails: [],
     fields: [
@@ -104,7 +106,7 @@ export const seedFormTemplates: FormTemplateInput[] = [
     active: true,
     startsAt: "",
     endsAt: "",
-    confirmationText: "Záznam čeká na potvrzení a na zpracování správou.",
+    confirmationText: received,
     approvalType: "single",
     notificationEmails: [],
     fields: [
@@ -131,7 +133,7 @@ export const seedFormTemplates: FormTemplateInput[] = [
     active: true,
     startsAt: "",
     endsAt: "",
-    confirmationText: "Žádost čeká na potvrzení z e-mailu.",
+    confirmationText: received,
     approvalType: "single",
     notificationEmails: [],
     fields: [
@@ -150,7 +152,7 @@ export const seedFormTemplates: FormTemplateInput[] = [
     active: true,
     startsAt: "",
     endsAt: "",
-    confirmationText: "Inzerát bude zveřejněn až po potvrzení a schválení správou.",
+    confirmationText: received,
     approvalType: "single",
     notificationEmails: [],
     fields: [
@@ -169,7 +171,7 @@ export const seedFormTemplates: FormTemplateInput[] = [
     active: true,
     startsAt: "",
     endsAt: "",
-    confirmationText: "Žádost čeká na potvrzení z e-mailu.",
+    confirmationText: received,
     approvalType: "single",
     notificationEmails: [],
     fields: [

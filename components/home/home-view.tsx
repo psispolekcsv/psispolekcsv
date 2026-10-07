@@ -1,10 +1,13 @@
+import Image from "next/image";
 import Link from "next/link";
 import { assets } from "@/lib/assets";
+import { PuppyThoughts } from "@/components/mascot/puppy-thoughts";
 import { WolfMascot } from "@/components/mascot/wolf-mascot";
+import { DynamicForm } from "@/components/forms/dynamic-form";
 import { EmptyState } from "@/components/content/empty-state";
 import { eventCategoryLabel } from "@/lib/labels";
 import { formatDate } from "@/lib/utils";
-import type { ClubEvent, Kennel, Litter, NewsArticle, Partner, SiteSettings } from "@/types/domain";
+import type { ClubEvent, FormTemplate, Kennel, Litter, NewsArticle, Partner, SiteSettings } from "@/types/domain";
 
 const facts = [
   ["FCI", "standard č. 332"],
@@ -23,6 +26,7 @@ export function HomeView({
   partners,
   breedingMales,
   breedingFemales,
+  membership,
 }: {
   settings: SiteSettings;
   news: NewsArticle[];
@@ -32,6 +36,7 @@ export function HomeView({
   partners: Partner[];
   breedingMales: number;
   breedingFemales: number;
+  membership: FormTemplate | null;
 }) {
   const puppies = litters.filter((item) => item.puppyAvailability === "available");
   const mated = litters.filter((item) => item.status === "mated");
@@ -51,7 +56,10 @@ export function HomeView({
               <Link href="/chov/stenata" className="rounded-md border border-line bg-paper px-4 py-2.5 text-sm font-semibold">Štěňata</Link>
             </div>
           </div>
-          <WolfMascot variant="standing" priority className="mx-auto h-[420px] w-full max-w-md" />
+          <div className="relative mx-auto h-[460px] w-full max-w-xl">
+            <PuppyThoughts />
+            <WolfMascot variant="puppy" priority className="relative z-10 mx-auto h-full w-[78%]" />
+          </div>
         </div>
       </section>
 
@@ -148,7 +156,7 @@ export function HomeView({
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {[
             ["/klub/clenstvi", "Členství", "Jak požádat o přijetí"],
-            ["/formulare", "Formuláře", "Přihlášky a žádosti dvou stran"],
+            ["/formulare", "Formuláře", "Přihlášky a žádosti pro správu klubu"],
             ["/dokumenty", "Dokumenty", "Řády a stanovy ke stažení"],
             ["/poradna", "Poradna", "Pro majitele i chovatele"],
             ["/databaze", "Databáze", "Psi, feny, vrhy a zdraví"],
@@ -159,6 +167,27 @@ export function HomeView({
               <p className="mt-1 text-sm text-ink/70">{text}</p>
             </Link>
           ))}
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden bg-[#d8d3cc]">
+        <div aria-hidden="true" className="pointer-events-none absolute -left-16 top-8 h-80 w-80 rounded-full bg-amber/35 blur-3xl" />
+        <div aria-hidden="true" className="pointer-events-none absolute right-[-4rem] bottom-0 h-[28rem] w-[36rem] rounded-full bg-white/80 blur-3xl" />
+        <div aria-hidden="true" className="pointer-events-none absolute left-1/3 top-1/3 h-72 w-72 rounded-full bg-ink/15 blur-3xl" />
+        <div className="relative mx-auto max-w-6xl px-4 py-16 md:py-20">
+          <div className="relative mx-auto max-w-3xl">
+            <div className="pointer-events-none absolute left-0 top-0 z-20 h-48 w-40 -translate-x-[68%] -translate-y-2 md:h-[27rem] md:w-[23rem] md:-translate-x-[60%] md:-translate-y-6">
+              <Image src={assets.mascotPeek} alt="" fill sizes="(min-width: 768px) 368px, 160px" className="object-contain object-right object-top" />
+            </div>
+            <div className="relative z-10 rounded-[1.6rem] border border-white/55 bg-white/15 p-6 pt-44 shadow-[0_30px_70px_-28px_rgba(24,24,24,0.5)] ring-1 ring-inset ring-white/60 backdrop-blur-lg md:p-10 md:pl-28">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-deep">Členství</p>
+              <h2 className="mt-2 font-serif text-4xl text-ink-deep">Žádost o připojení do klubu</h2>
+              <p className="mt-3 max-w-2xl text-ink/80">Vyplňte údaje a e-mail. Potvrzení přijde vám i správě klubu. Ve správě si žádost otevřou a mohou ji schválit, odpovědět, nechat bez reakce, nebo smazat.</p>
+              <div className="mt-6 [&_form]:max-w-none">
+                {membership ? <DynamicForm template={membership} dogs={[]} /> : <p className="text-sm text-ink/70">Formulář se zobrazí, až bude připojená databáze klubu.</p>}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { HomeView } from "@/components/home/home-view";
-import { getSettings, listDogs, listEvents, listKennels, listLitters, listNews, listPartners } from "@/lib/server/data";
+import { ensureMembershipForm, getSettings, listDogs, listEvents, listKennels, listLitters, listNews, listPartners } from "@/lib/server/data";
 import { siteUrl } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [settings, news, events, litters, kennels, dogs, partners] = await Promise.all([
+  const [settings, news, events, litters, kennels, dogs, partners, membership] = await Promise.all([
     getSettings(),
     listNews(true),
     listEvents(),
@@ -18,6 +18,7 @@ export default async function HomePage() {
     listKennels(),
     listDogs(),
     listPartners(),
+    ensureMembershipForm(),
   ]);
   const publishedDogs = dogs.filter((dog) => dog.published && dog.lifeStatus === "active");
   const jsonLd = {
@@ -41,6 +42,7 @@ export default async function HomePage() {
         partners={partners.filter((item) => item.published)}
         breedingMales={publishedDogs.filter((dog) => dog.sex === "male" && dog.breedingStatus === "breeding").length}
         breedingFemales={publishedDogs.filter((dog) => dog.sex === "female" && dog.breedingStatus === "breeding").length}
+        membership={membership}
       />
     </>
   );

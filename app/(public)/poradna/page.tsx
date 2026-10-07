@@ -7,7 +7,7 @@ export default function Page() {
   return (
     <CmsScreen
       slug="poradna"
-      crumbs={[{ label: "Poradna" }, { label: "Poradna" }]}
+      crumbs={[{ label: "Poradna" }]}
     />
   );
 }

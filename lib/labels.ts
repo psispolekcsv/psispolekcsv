@@ -86,11 +86,13 @@ export const puppyLabel: Record<PuppyAvailability, string> = {
 
 export const submissionStatusLabel: Record<SubmissionStatus, string> = {
   draft: "Koncept",
-  submitted: "Odesláno",
+  submitted: "Čeká na správu",
   awaiting_party_a: "Čeká na první stranu",
   awaiting_party_b: "Čeká na druhou stranu",
   awaiting_approvals: "Čeká na obě strany",
   approved: "Schváleno",
+  responded: "Odpovězeno",
+  ignored: "Bez reakce",
   rejected: "Zamítnuto",
   expired: "Vypršelo",
   cancelled: "Zrušeno",

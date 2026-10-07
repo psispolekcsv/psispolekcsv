@@ -57,6 +57,8 @@ const statuses = new Set<SubmissionStatus>([
   "awaiting_party_b",
   "awaiting_approvals",
   "approved",
+  "responded",
+  "ignored",
   "rejected",
   "expired",
   "cancelled",
@@ -316,6 +318,7 @@ export function mapSubmission(id: string, data: Data): FormSubmission {
     createdAt: str(data, "createdAt"),
     updatedAt: str(data, "updatedAt"),
     approvedAt: typeof data.approvedAt === "string" ? data.approvedAt : null,
+    adminMessage: str(data, "adminMessage"),
   };
 }
 

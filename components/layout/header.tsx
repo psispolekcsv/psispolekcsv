@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { assets } from "@/lib/assets";
 import { mainNav, type NavItem } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
@@ -22,12 +22,14 @@ function itemActive(pathname: string, item: NavItem) {
 export function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [mobileSection, setMobileSection] = useState<string | null>(null);
   const [openedMenu, setOpenedMenu] = useState<string | null>(null);
   const [pinnedMenu, setPinnedMenu] = useState(false);
   const menuId = useId();
 
   useEffect(() => {
     setOpen(false);
+    setMobileSection(null);
     setOpenedMenu(null);
     setPinnedMenu(false);
   }, [pathname]);
@@ -68,12 +70,12 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-paper">
-      <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
-        <Link href="/" className="flex shrink-0 items-center gap-3">
-          <Image src={assets.logo} alt="Znak Klubu československého vlčáka" width={52} height={52} priority className="h-12 w-12" />
-          <span className="hidden font-serif text-lg leading-tight text-ink-deep sm:block">
+      <div className="relative mx-auto flex h-[73px] max-w-6xl items-center px-4 lg:h-auto lg:gap-4 lg:py-3">
+        <Link href="/" className="z-10 flex shrink-0 items-center gap-3">
+          <Image src={assets.logo} alt="" width={52} height={52} priority className="h-10 w-10 sm:h-12 sm:w-12" />
+          <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center font-serif text-sm leading-none text-ink-deep sm:static sm:translate-x-0 sm:translate-y-0 sm:text-left sm:text-lg sm:leading-tight">
             Klub
-            <span className="block text-sm font-sans tracking-wide text-ink/70">československého vlčáka</span>
+            <span className="mt-0.5 block font-sans text-[10px] tracking-normal text-ink/70 sm:mt-0 sm:text-sm sm:tracking-wide">československého vlčáka</span>
           </span>
         </Link>
 
@@ -156,7 +158,7 @@ export function Header() {
 
         <button
           type="button"
-          className="ml-auto inline-flex items-center gap-2 rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold lg:hidden"
+          className="relative z-10 ml-auto inline-flex items-center gap-2 rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold lg:hidden"
           aria-expanded={open}
           aria-controls="mobilni-menu"
           onClick={() => setOpen((value) => !value)}
@@ -177,16 +179,27 @@ export function Header() {
                   </Link>
                 ) : (
                   <>
-                    <p className="border-b border-line px-4 py-3 font-semibold">{item.label}</p>
-                    <ul>
-                      {item.children?.map((child) => (
-                        <li key={child.href}>
-                          <Link href={child.href} className="block px-4 py-3 text-ink/90">
-                            {child.label}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
+                    <button
+                      type="button"
+                      className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left font-semibold"
+                      aria-expanded={mobileSection === item.label}
+                      aria-controls={`mobil-${item.label}`}
+                      onClick={() => setMobileSection((current) => (current === item.label ? null : item.label))}
+                    >
+                      {item.label}
+                      <ChevronDown size={18} aria-hidden="true" className={cn("shrink-0 transition-transform", mobileSection === item.label && "rotate-180")} />
+                    </button>
+                    {mobileSection === item.label ? (
+                      <ul id={`mobil-${item.label}`} className="border-t border-line">
+                        {item.children?.map((child) => (
+                          <li key={child.href}>
+                            <Link href={child.href} className="block px-4 py-3 text-ink/90">
+                              {child.label}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
                   </>
                 )}
               </div>

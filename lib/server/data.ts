@@ -1,6 +1,7 @@
 import "server-only";
 import { adminDb } from "@/lib/firebase/admin";
 import { fallbackPage } from "@/lib/content/defaults";
+import { seedFormTemplates } from "@/lib/forms/seed";
 import {
   mapAudit,
   mapClassified,
@@ -167,6 +168,15 @@ export async function listTemplates() {
 export async function getTemplateBySlug(slug: string) {
   const items = await listTemplates();
   return items.find((item) => item.slug === slug) || null;
+}
+
+export async function ensureMembershipForm() {
+  const existing = await getTemplateBySlug("prihlaska-do-klubu");
+  if (existing) return existing;
+  const template = seedFormTemplates.find((item) => item.slug === "prihlaska-do-klubu");
+  if (!template || !adminDb()) return null;
+  await saveDoc("formTemplates", template.slug, template);
+  return getTemplateBySlug("prihlaska-do-klubu");
 }
 
 export async function listSubmissions() {
