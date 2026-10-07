@@ -176,7 +176,7 @@ export function HomeView({
         <div aria-hidden="true" className="pointer-events-none absolute left-1/3 top-1/3 h-72 w-72 rounded-full bg-ink/15 blur-3xl" />
         <div className="relative mx-auto max-w-6xl px-4 py-16 md:py-20">
           <div className="relative mx-auto max-w-3xl">
-            <div className="pointer-events-none absolute left-0 top-0 z-20 h-48 w-40 -translate-x-[68%] -translate-y-2 md:h-[27rem] md:w-[23rem] md:-translate-x-[60%] md:-translate-y-6">
+            <div className="pointer-events-none absolute left-0 top-0 z-20 h-48 w-40 -translate-x-[68%] -translate-y-2 md:h-[27rem] md:w-[23rem] md:-translate-x-[76%] md:-translate-y-6">
               <Image src={assets.mascotPeek} alt="" fill sizes="(min-width: 768px) 368px, 160px" className="object-contain object-right object-top" />
             </div>
             <div className="relative z-10 rounded-[1.6rem] border border-white/55 bg-white/15 p-6 pt-44 shadow-[0_30px_70px_-28px_rgba(24,24,24,0.5)] ring-1 ring-inset ring-white/60 backdrop-blur-lg md:p-10 md:pl-28">
