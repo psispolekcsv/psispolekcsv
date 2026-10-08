@@ -6,6 +6,21 @@ import { getStorage } from "firebase-admin/storage";
 
 let cached: App | null | undefined;
 
+function parseServiceAccount(raw: string) {
+  let value = raw.trim().replace(/^\uFEFF/, "");
+  while (
+    value.length >= 2 &&
+    ((value.startsWith("'") && value.endsWith("'")) || (value.startsWith('"') && value.endsWith('"')))
+  ) {
+    value = value.slice(1, -1).trim();
+  }
+  const json = JSON.parse(value) as { client_email?: string; private_key?: string; project_id?: string };
+  if (json.private_key?.includes("\\n")) {
+    json.private_key = json.private_key.replace(/\\n/g, "\n");
+  }
+  return json;
+}
+
 export function getAdminApp() {
   if (cached !== undefined) return cached;
   const existing = getApps()[0];
@@ -19,7 +34,7 @@ export function getAdminApp() {
     return null;
   }
   try {
-    const json = JSON.parse(raw) as { client_email?: string; private_key?: string; project_id?: string };
+    const json = parseServiceAccount(raw);
     if (!json.client_email || !json.private_key) {
       cached = null;
       return null;

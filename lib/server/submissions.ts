@@ -8,10 +8,8 @@ import { siteUrl } from "@/lib/utils";
 import {
   mailAdminDecision,
   mailAdminNewSubmission,
-  mailAskApproval,
   mailFinal,
   mailPartial,
-  mailReceived,
   mailRejected,
   mailSubmissionReceived,
 } from "@/lib/mail/templates";
@@ -33,32 +31,10 @@ function workflowOf(submission: FormSubmission): WorkflowState {
   };
 }
 
-function tokenTtl() {
-  const hours = Number(process.env.APPROVAL_TOKEN_TTL_HOURS || 336);
-  return Number.isFinite(hours) && hours > 1 ? hours : 336;
-}
-
 async function deliver(to: string, subject: string, html: string, template: string, submissionId: string) {
   if (!to) return;
   const result = await sendEmail({ to, subject, html });
   await writeEmailLog({ to, subject, template, submissionId, provider: result.provider, ok: result.ok });
-}
-
-async function issueToken(submissionId: string, party: "a" | "b") {
-  const db = adminDb();
-  if (!db) throw new Error("Firebase Admin není nakonfigurovaný.");
-  const secret = createApprovalSecret();
-  const now = new Date();
-  const expiresAt = new Date(now.getTime() + tokenTtl() * 60 * 60 * 1000).toISOString();
-  await db.collection("approvalTokens").doc(secret.hash).set({
-    hash: secret.hash,
-    submissionId,
-    party,
-    expiresAt,
-    usedAt: null,
-    createdAt: now.toISOString(),
-  });
-  return { raw: secret.raw, hash: secret.hash, expiresAt };
 }
 
 async function issueReceipt(submissionId: string, party: "a" | "b") {
