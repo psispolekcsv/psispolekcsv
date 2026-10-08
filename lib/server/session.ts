@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { canAccessAdmin, canManageAdmins } from "@/lib/auth/permissions";
@@ -28,7 +29,7 @@ export async function clearSessionCookie() {
   jar.delete(SESSION_COOKIE);
 }
 
-export async function getCurrentUser(): Promise<UserProfile | null> {
+export const getCurrentUser = cache(async (): Promise<UserProfile | null> => {
   const jar = await cookies();
   const session = jar.get(SESSION_COOKIE)?.value;
   if (!session) return null;
@@ -57,7 +58,7 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
   } catch {
     return null;
   }
-}
+});
 
 export async function requireUser() {
   const user = await getCurrentUser();

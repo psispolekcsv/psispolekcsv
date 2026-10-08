@@ -4,7 +4,7 @@ import { sendEmail } from "@/lib/mail/service";
 import { mailAdminPending } from "@/lib/mail/templates";
 import { writeAudit, writeEmailLog } from "@/lib/server/audit";
 import { getSettings } from "@/lib/server/data";
-import { sameOrigin } from "@/lib/server/rate-limit";
+import { enforceMemoryRateLimit, requestIp, sameOrigin } from "@/lib/server/rate-limit";
 import { siteUrl } from "@/lib/utils";
 
 export const runtime = "nodejs";
@@ -19,6 +19,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, message: "Server Firebase není nakonfigurovaný." }, { status: 503 });
   }
   try {
+    enforceMemoryRateLimit(requestIp(request), "admin-register", 5, 60 * 60 * 1000);
     const decoded = await auth.verifyIdToken(body.idToken);
     const ref = db.collection("users").doc(decoded.uid);
     const existing = await ref.get();

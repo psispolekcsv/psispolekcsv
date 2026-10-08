@@ -37,7 +37,6 @@ export function LoginForm() {
       const body = (await response.json()) as { message?: string };
       if (!response.ok) throw new Error(body.message || "Server nepřijal přihlášení.");
       router.push("/sprava");
-      router.refresh();
     } catch (caught) {
       setError(authError(caught));
       setPending(false);

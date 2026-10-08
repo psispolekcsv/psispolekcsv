@@ -9,6 +9,18 @@ function keyFor(ip: string, bucket: string) {
   return createHash("sha256").update(`${salt}:${bucket}:${ip}`).digest("hex");
 }
 
+export function enforceMemoryRateLimit(ip: string, bucket: string, limit: number, windowMs: number) {
+  const key = keyFor(ip, bucket);
+  const now = Date.now();
+  const current = memory.get(key);
+  if (!current || current.reset < now) {
+    memory.set(key, { count: 1, reset: now + windowMs });
+    return;
+  }
+  current.count += 1;
+  if (current.count > limit) throw new Error("Příliš mnoho požadavků. Zkuste to později.");
+}
+
 export async function enforceRateLimit(ip: string, bucket: string, limit: number, windowMs: number) {
   const key = keyFor(ip, bucket);
   const now = Date.now();
